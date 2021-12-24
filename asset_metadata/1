@@ -1,0 +1,19 @@
+{
+    "name": "Bumpy Chester",
+    "image": "https://gateway.pinata.cloud/ipfs/QmeY4PtJXwLxCiUcZ9iUYXoEKdCd2Li2Fu1Bx5BskW1Lhc",
+    "description": "This is the bumpy chester",
+    "attributes": [
+        {
+            "trait_type": "skin",
+            "value": "bumpy"
+        },
+        {
+            "trait_type": "position",
+            "value": "sitting"
+        },
+        {
+            "trait_type": "time_of_day",
+            "value": "morning"
+        }
+    ]
+}

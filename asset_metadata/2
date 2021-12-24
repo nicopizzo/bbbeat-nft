@@ -1,0 +1,19 @@
+{
+    "name": "Wrapped Chester",
+    "image": "https://gateway.pinata.cloud/ipfs/QmTyHhPUX6RQq9rTJ7Kk1LTy6MryPmPbW3H1FLo6MzFUDs",
+    "description": "This is the chester wrapped in a blanket",
+    "attributes": [
+        {
+            "trait_type": "skin",
+            "value": "clear"
+        },
+        {
+            "trait_type": "position",
+            "value": "laying"
+        },
+        {
+            "trait_type": "time_of_day",
+            "value": "afternoon"
+        }
+    ]
+}

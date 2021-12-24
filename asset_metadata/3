@@ -1,0 +1,19 @@
+{
+    "name": "Christmas Chester",
+    "image": "https://gateway.pinata.cloud/ipfs/QmRhK1QfZQL2gicjwfQDcUjxjEvbarH6xdExEmrbAPi2t5",
+    "description": "This is the chester next to the christmas tree",
+    "attributes": [
+        {
+            "trait_type": "skin",
+            "value": "clear"
+        },
+        {
+            "trait_type": "position",
+            "value": "sitting"
+        },
+        {
+            "trait_type": "time_of_day",
+            "value": "afternoon"
+        }
+    ]
+}
