@@ -34,17 +34,30 @@ contract ChesterNFT is ERC721Enumerable, Ownable {
         _baseTokenURI = baseUri;
     }
 
-    // external function to mint an nft with a given hash
-    function mintNFT(address to, uint256 mintCount)
-        external payable
-    {  
+    modifier checkMintSupply(uint mintCount) {
+        require(mintCount > 0, "Mint count must be greater than 0");   
         require(_tokenIds.current() + mintCount <= _maxSupply, "Max number of nfts created");
-        require(mintCount > 0, "Mint count must be greater than 0");
+        _;
+    }
+
+    // external function to mint an nft with a given hash
+    function mint(address to, uint256 mintCount)
+        external payable checkMintSupply(mintCount)
+    {  
         require(msg.value >= _mintCost * mintCount, "Not enough eth sent to mint");
         require(balanceOf(to) + mintCount <= _maxMintPerUser, "Max mints for account exceeded");
 
         for(uint256 i = 0; i < mintCount; i++){
-            _mintNFT(to);
+            _mint(to);
+        }
+    }
+
+    // ability to give token to an address for free
+    function give(address to, uint256 mintCount)
+        external onlyOwner checkMintSupply(mintCount) 
+    {
+        for(uint256 i = 0; i < mintCount; i++){
+            _mint(to);
         }
     }
 
@@ -56,7 +69,7 @@ contract ChesterNFT is ERC721Enumerable, Ownable {
         payable(owner()).transfer(balance);
     }
 
-    function _mintNFT(address to)
+    function _mint(address to)
         internal
         returns (uint256)
     {      
