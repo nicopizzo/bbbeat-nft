@@ -1,7 +1,8 @@
 const ChesterNFT = artifacts.require("ChesterNFT");
 var mintCost = "100000000000000000";
 var BN = web3.utils.BN;
-var testContract = "0x00F77b302AF61eE999Bacb4dCFeAF54EdC678434";
+//var testContract = "0x00F77b302AF61eE999Bacb4dCFeAF54EdC678434";
+var testContract = "";
 
 async function createContract(){
   if(testContract) return ChesterNFT.at(testContract);
@@ -13,7 +14,7 @@ contract("ChesterNFT", async accounts => {
   it("should mint 1 from contract owner to contract owner", async () => {
     var chester = await createContract();
     var user = accounts[0];
-    await chester.mintNFT(user, 1, { value: mintCost });
+    await chester.mint(user, 1, { value: mintCost });
 
     var bal = await chester.balanceOf(user);
     assert.equal(bal.words[0], 1);
@@ -22,7 +23,7 @@ contract("ChesterNFT", async accounts => {
   it("should 1 mint by user", async () => {
     var chester = await createContract();
     var user = accounts[1];
-    await chester.mintNFT(user, 1, { value: mintCost, from: user });
+    await chester.mint(user, 1, { value: mintCost, from: user });
 
     var bal = await chester.balanceOf(user);
     assert.equal(bal.words[0], 1);
@@ -31,7 +32,7 @@ contract("ChesterNFT", async accounts => {
   it("should 2 mint by user", async () => {
     var chester = await createContract();
     var user = accounts[1];
-    await chester.mintNFT(user, 2, { value: new BN(mintCost).mul(new BN(2)).toString(), from: user });
+    await chester.mint(user, 2, { value: new BN(mintCost).mul(new BN(2)).toString(), from: user });
 
     var bal = await chester.balanceOf(user);
     assert.equal(bal.words[0], 3);
@@ -41,7 +42,7 @@ contract("ChesterNFT", async accounts => {
     var chester = await createContract();
     var user = accounts[2];
     try{
-      await chester.mintNFT(user, 2, { value: new BN(mintCost).mul(new BN(2)).toString(), from: user });
+      await chester.mint(user, 2, { value: new BN(mintCost).mul(new BN(2)).toString(), from: user });
       assert.fail("The transaction should have thrown an error.");
     }
     catch(err){
@@ -56,7 +57,7 @@ contract("ChesterNFT", async accounts => {
     var chester = await createContract();
     var user = accounts[1];
     try{
-      await chester.mintNFT(user, 1, { value: mintCost, from: user });
+      await chester.mint(user, 1, { value: mintCost, from: user });
       assert.fail("The transaction should have thrown an error.");
     }
     catch(err){
@@ -114,7 +115,7 @@ contract("ChesterNFT", async accounts => {
     var user = accounts[2];
 
     try{
-      await chester.mintNFT(user, 2, {value: mintCost, from: user});
+      await chester.mint(user, 2, {value: mintCost, from: user});
       assert.fail("The transaction should have thrown an error.");
     }
     catch(err){
@@ -130,7 +131,7 @@ contract("ChesterNFT", async accounts => {
     var user = accounts[2];
 
     try{
-      await chester.mintNFT(user, 0, {value: mintCost, from: user});
+      await chester.mint(user, 0, {value: mintCost, from: user});
       assert.fail("The transaction should have thrown an error.");
     }
     catch(err){
