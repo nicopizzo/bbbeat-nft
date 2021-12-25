@@ -56,6 +56,7 @@ contract ChesterNFT is ERC721Enumerable, Ownable {
     function give(address to, uint256 mintCount)
         external onlyOwner checkMintSupply(mintCount) 
     {
+        // todo add checks to set max give away supply
         for(uint256 i = 0; i < mintCount; i++){
             _mint(to);
         }
