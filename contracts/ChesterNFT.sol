@@ -38,9 +38,10 @@ contract ChesterNFT is ERC721Enumerable, Ownable {
     function mintNFT(address to, uint256 mintCount)
         external payable
     {  
+        require(_tokenIds.current() + mintCount <= _maxSupply, "Max number of nfts created");
         require(mintCount > 0, "Mint count must be greater than 0");
         require(msg.value >= _mintCost * mintCount, "Not enough eth sent to mint");
-        require(balanceOf(to) + mintCount <= _maxMintPerUser, "Max mints exceeded");
+        require(balanceOf(to) + mintCount <= _maxMintPerUser, "Max mints for account exceeded");
 
         for(uint256 i = 0; i < mintCount; i++){
             _mintNFT(to);
@@ -59,9 +60,6 @@ contract ChesterNFT is ERC721Enumerable, Ownable {
         internal
         returns (uint256)
     {      
-        // intentionally allowing a way to mint more that the mint per user
-        require(_tokenIds.current() != _maxSupply, "Max number of nfts created");
-
         _tokenIds.increment();
 
         uint256 newItemId = _tokenIds.current();
