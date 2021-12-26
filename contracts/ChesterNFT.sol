@@ -11,9 +11,13 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 contract ChesterNFT is ERC721Enumerable, Ownable {
     using Counters for Counters.Counter;
     Counters.Counter private _tokenIds;
+    Counters.Counter private _giveCount;
 
     // max number of nfts we are able to mint
     uint256 private _maxSupply;
+
+    // max number of the supply availible to give
+    uint256 private _maxGiveSupply;
 
     // cost to mint a nft
     uint256 private _mintCost;
@@ -27,11 +31,14 @@ contract ChesterNFT is ERC721Enumerable, Ownable {
     constructor(uint256 maxSupply, 
                 uint256 mintCost,
                 uint256 maxMintPerUser, 
+                uint256 maxGiveSupply,
                 string memory baseUri) ERC721("ChesterNFT", "HAM") {
         _maxSupply = maxSupply;
         _mintCost = mintCost;
         _maxMintPerUser = maxMintPerUser;
         _baseTokenURI = baseUri;
+        require(maxSupply > maxGiveSupply, "Give supply exceeds total supply");
+        _maxGiveSupply = maxGiveSupply;
     }
 
     modifier checkMintSupply(uint mintCount) {
@@ -56,9 +63,10 @@ contract ChesterNFT is ERC721Enumerable, Ownable {
     function give(address to, uint256 mintCount)
         external onlyOwner checkMintSupply(mintCount) 
     {
-        // todo add checks to set max give away supply
+        require(_giveCount.current() + mintCount <= _maxGiveSupply, "Max give supply exceeded");
         for(uint256 i = 0; i < mintCount; i++){
             _mint(to);
+            _giveCount.increment();
         }
     }
 
