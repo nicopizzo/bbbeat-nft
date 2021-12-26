@@ -4,6 +4,44 @@ var mintCost = "100000000000000000";
 var BN = web3.utils.BN;
 
 contract("ChesterNFT", async accounts => {
+  it("should not mint, minting not live", async () => {
+    var chester = await base.createContract();
+    var user = accounts[0];
+    try{
+      await chester.mint(user, 1, { value: mintCost });
+      assert.fail("The transaction should have thrown an error.");
+    }
+    catch(err){
+      assert.include(err.message, "revert", "The error message should contain 'revert'");
+    }
+    
+    var isLive = await chester.isLive();
+    assert(!isLive);
+  });
+
+  it("should not toggle minting to live, not owner", async () => {
+    var chester = await base.createContract();
+    try{
+      await chester.toggleLive({from: accounts[1]});
+      assert.fail("The transaction should have thrown an error.");
+    }
+    catch(err){
+      assert.include(err.message, "revert", "The error message should contain 'revert'");
+    }
+
+    var isLive = await chester.isLive();
+    assert(!isLive);
+  });
+
+  it("should toggle minting to live", async () => {
+    var chester = await base.createContract();
+    await chester.toggleLive();
+
+    var isLive = await chester.isLive();
+    assert(isLive);
+  });
+
+
   it("should mint 1 from contract owner to contract owner", async () => {
     var chester = await base.createContract();
     var user = accounts[0];

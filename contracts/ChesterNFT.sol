@@ -28,6 +28,9 @@ contract ChesterNFT is ERC721Enumerable, Ownable {
     // base uri for hosting the images/ metadata
     string private _baseTokenURI;
 
+    // determine if public minting is live
+    bool public isLive;
+
     constructor(uint256 maxSupply, 
                 uint256 mintCost,
                 uint256 maxMintPerUser, 
@@ -39,6 +42,7 @@ contract ChesterNFT is ERC721Enumerable, Ownable {
         _baseTokenURI = baseUri;
         require(maxSupply > maxGiveSupply, "Give supply exceeds total supply");
         _maxGiveSupply = maxGiveSupply;
+        isLive = false;
     }
 
     modifier checkMintSupply(uint mintCount) {
@@ -51,6 +55,7 @@ contract ChesterNFT is ERC721Enumerable, Ownable {
     function mint(address to, uint256 mintCount)
         external payable checkMintSupply(mintCount)
     {  
+        require(isLive, "Minting is not live");
         require(msg.value >= _mintCost * mintCount, "Not enough eth sent to mint");
         require(balanceOf(to) + mintCount <= _maxMintPerUser, "Max mints for account exceeded");
 
@@ -60,6 +65,7 @@ contract ChesterNFT is ERC721Enumerable, Ownable {
     }
 
     // ability to give token to an address for free
+    // has ability to give prior to go live
     function give(address to, uint256 mintCount)
         external onlyOwner checkMintSupply(mintCount) 
     {
@@ -76,6 +82,12 @@ contract ChesterNFT is ERC721Enumerable, Ownable {
     {
         uint balance = address(this).balance;
         payable(owner()).transfer(balance);
+    }
+
+    function toggleLive()
+        external onlyOwner
+    {
+        isLive = !isLive;
     }
 
     function _mint(address to)
