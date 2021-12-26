@@ -1,18 +1,11 @@
-const ChesterNFT = artifacts.require("ChesterNFT");
+var base = require("../modules/ChesterBaseTests");
+
 var mintCost = "100000000000000000";
 var BN = web3.utils.BN;
-//var testContract = "0x00F77b302AF61eE999Bacb4dCFeAF54EdC678434";
-var testContract = "";
-
-async function createContract(){
-  if(testContract) return ChesterNFT.at(testContract);
-  return ChesterNFT.deployed();
-}
 
 contract("ChesterNFT", async accounts => {
-  // mint tests
   it("should mint 1 from contract owner to contract owner", async () => {
-    var chester = await createContract();
+    var chester = await base.createContract();
     var user = accounts[0];
     await chester.mint(user, 1, { value: mintCost });
 
@@ -21,7 +14,7 @@ contract("ChesterNFT", async accounts => {
   });
 
   it("should 1 mint by user", async () => {
-    var chester = await createContract();
+    var chester = await base.createContract();
     var user = accounts[1];
     await chester.mint(user, 1, { value: mintCost, from: user });
 
@@ -30,7 +23,7 @@ contract("ChesterNFT", async accounts => {
   });
 
   it("should 2 mint by user", async () => {
-    var chester = await createContract();
+    var chester = await base.createContract();
     var user = accounts[1];
     await chester.mint(user, 2, { value: new BN(mintCost).mul(new BN(2)).toString(), from: user });
 
@@ -39,7 +32,7 @@ contract("ChesterNFT", async accounts => {
   });
 
   it("should not mint, max supply exceeded", async () => {
-    var chester = await createContract();
+    var chester = await base.createContract();
     var user = accounts[2];
     try{
       await chester.mint(user, 2, { value: new BN(mintCost).mul(new BN(2)).toString(), from: user });
@@ -54,7 +47,7 @@ contract("ChesterNFT", async accounts => {
   });
 
   it("should not mint, user exceeded max mint", async () => {
-    var chester = await createContract();
+    var chester = await base.createContract();
     var user = accounts[1];
     try{
       await chester.mint(user, 1, { value: mintCost, from: user });
@@ -70,14 +63,14 @@ contract("ChesterNFT", async accounts => {
 
   // token id tests
   it("should get token id by owner", async () => {
-    var chester = await createContract();
+    var chester = await base.createContract();
     var result = await chester.tokenOfOwnerByIndex(accounts[1], 0);
 
     assert.equal(result.words[0], 2);
   });
 
   it("should get token uri for id 2", async () => {
-    var chester = await createContract();
+    var chester = await base.createContract();
     var result = await chester.tokenURI(2);
 
     assert.equal(result, "https://gateway.pinata.cloud/ipfs/QmZ2a29sVd7pNz9QGtb76aR99UKBzqcyoXnETDfDXBDXyv/2");
@@ -85,7 +78,7 @@ contract("ChesterNFT", async accounts => {
 
   // withdraw tests
   it("should not be able to withdraw, not owner", async () => {
-    var chester = await createContract();
+    var chester = await base.createContract();
 
     try{
       await chester.withdraw({from: accounts[1]});
@@ -97,7 +90,7 @@ contract("ChesterNFT", async accounts => {
   });
 
   it("should withdraw contract to owner", async () => {   
-    var chester = await createContract();
+    var chester = await base.createContract();
 
     var contractBal = await web3.eth.getBalance(chester.address);
     var accountStartBal = await web3.eth.getBalance(accounts[0]);
@@ -111,7 +104,7 @@ contract("ChesterNFT", async accounts => {
 
   // negative tests
   it("should not mint 2, not enough eth sent, enough for just 1", async () => {
-    var chester = await createContract();
+    var chester = await base.createContract();
     var user = accounts[2];
 
     try{
@@ -127,7 +120,7 @@ contract("ChesterNFT", async accounts => {
   });
 
   it("should not mint, invalid mint count", async () => {
-    var chester = await createContract();
+    var chester = await base.createContract();
     var user = accounts[2];
 
     try{
@@ -141,38 +134,4 @@ contract("ChesterNFT", async accounts => {
     var bal = await chester.balanceOf(user);
     assert.equal(bal.words[0], 0);
   });
-});
-
-// give tests
-contract("ChesterNFT", async accounts => {
-  it("should give 1 from owner to another user", async () => {
-    var chester = await createContract();
-    var user = accounts[5];
-
-    await chester.give(user, 1);
-
-    var bal = await chester.balanceOf(user)
-    assert.equal(bal.words[0], 1);
-  });
-
-  it("should not give, not owner", async () =>{
-    var chester = await createContract();
-    var user = accounts[2];
-
-    try{
-      await chester.give(user, 1, {from: user});
-      assert.fail("The transaction should have thrown an error.");
-    }
-    catch(err){
-      assert.include(err.message, "revert", "The error message should contain 'revert'");
-    }
-    var bal = await chester.balanceOf(user)
-    assert.equal(bal.words[0], 0);
-  });
-
-  // give bad mint count
-
-  // give max supply exceeded
-
-  //
 });
