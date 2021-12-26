@@ -7,7 +7,7 @@ contract("ChesterNFT", async accounts => {
   
       await chester.give(user, 1);
   
-      var bal = await chester.balanceOf(user)
+      var bal = await chester.balanceOf(user);
       assert.equal(bal.words[0], 1);
     });
   
@@ -22,7 +22,7 @@ contract("ChesterNFT", async accounts => {
       catch(err){
         assert.include(err.message, "revert", "The error message should contain 'revert'");
       }
-      var bal = await chester.balanceOf(user)
+      var bal = await chester.balanceOf(user);
       assert.equal(bal.words[0], 0);
     });
   
@@ -37,7 +37,7 @@ contract("ChesterNFT", async accounts => {
       catch(err){
         assert.include(err.message, "revert", "The error message should contain 'revert'");
       }
-      var bal = await chester.balanceOf(user)
+      var bal = await chester.balanceOf(user);
       assert.equal(bal.words[0], 0);
     });
 
@@ -63,7 +63,42 @@ contract("ChesterNFT", async accounts => {
       catch(err){
         assert.include(err.message, "revert", "The error message should contain 'revert'");
       }
-      var bal = await chester.balanceOf(user)
+      var bal = await chester.balanceOf(user);
       assert.equal(bal.words[0], 0);
+    });
+
+    it("should approve user 6 to transfer", async () =>{
+      var chester = await base.createContract();
+      var user = accounts[6];
+      await chester.approve(user, 1, {from: accounts[5]});
+
+      var approvedAccount = await chester.getApproved(1);
+      assert.equal(approvedAccount, user);
+    });
+
+    it("should not transfer, user 4 not approved", async () =>{
+      var chester = await base.createContract();
+      var user = accounts[4];
+
+      try
+      {
+        await chester.safeTransferFrom(accounts[5], user, 1, {from: user});
+        assert.fail("The transaction should have thrown an error.");
+      }
+      catch(err){
+        assert.include(err.message, "revert", "The error message should contain 'revert'");
+      }
+
+      var bal = await chester.balanceOf(user);
+      assert.equal(bal, 0);
+    });
+
+    it("should transfer, user 6 approved", async () =>{
+      var chester = await base.createContract();
+      var user = accounts[6];
+      await chester.safeTransferFrom(accounts[5], user, 1, {from: user});
+
+      var bal = await chester.balanceOf(user);
+      assert.equal(bal, 1);
     });
   });
