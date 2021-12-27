@@ -102,9 +102,13 @@ contract("ChesterNFT", async accounts => {
   // token id tests
   it("should get token id by owner", async () => {
     var chester = await base.createContract();
+    var startIndex = await chester.startingIndex();
+    var maxSupply = await chester.maxSupply();
     var result = await chester.tokenOfOwnerByIndex(accounts[1], 0);
 
-    assert.equal(result.words[0], 3);
+    var tokenId = base.getNewIndex(startIndex, 1, maxSupply);
+
+    assert.equal(result.words[0], tokenId);
   });
 
   it("should get token uri for id 2, not set", async () => {

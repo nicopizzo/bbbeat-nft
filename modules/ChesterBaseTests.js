@@ -8,7 +8,16 @@ async function createContract(){
   return ChesterNFT.deployed();
 }
 
+function getNewIndex(startIndex, increment, maxSupply){
+  var newIndex = startIndex.words[0] + increment;
+  if(newIndex >= maxSupply.words[0]){
+      newIndex = newIndex - maxSupply.words[0];
+  }
+  return newIndex;
+}
+
 module.exports = {
     ChesterNFT: ChesterNFT,
-    createContract: createContract
+    createContract: createContract,
+    getNewIndex: getNewIndex
 };

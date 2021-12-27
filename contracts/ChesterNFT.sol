@@ -14,19 +14,16 @@ contract ChesterNFT is ERC721Enumerable, Ownable {
     Counters.Counter private _giveCount;
 
     // max number of nfts we are able to mint
-    uint256 private _maxSupply;
+    uint256 public maxSupply;
 
     // max number of the supply availible to give
-    uint256 private _maxGiveSupply;
+    uint256 public maxGiveSupply;
 
     // cost to mint a nft
-    uint256 private _mintCost;
+    uint256 public mintCost;
 
     // max number of nfts a user can mint
-    uint256 private _maxMintPerUser;
-
-    // base uri for hosting the images/ metadata
-    string private _baseTokenURI;
+    uint256 public maxMintPerUser;
 
     // determine if public minting is live
     bool public isLive = false;
@@ -37,25 +34,30 @@ contract ChesterNFT is ERC721Enumerable, Ownable {
     // index in which we are starting the distribution
     uint256 public startingIndex;
 
-    constructor(uint256 maxSupply, 
-                uint256 mintCost,
-                uint256 maxMintPerUser, 
-                uint256 maxGiveSupply,
+    // base uri for hosting the images/ metadata
+    // this will be set after minting is completed
+    // provenance hash can be used to verify the integrity of the order and assets
+    string private _baseTokenURI;
+
+    constructor(uint256 maxsupply, 
+                uint256 mintcost,
+                uint256 maxmintPerUser, 
+                uint256 maxgiveSupply,
                 string memory provenancehash) ERC721("ChesterNFT", "HAM") 
     {
-        require(maxSupply > maxGiveSupply, "Give supply exceeds total supply");
+        require(maxsupply > maxgiveSupply, "Give supply exceeds total supply");
 
-        _maxSupply = maxSupply;
-        _mintCost = mintCost;
-        _maxMintPerUser = maxMintPerUser;
-        _maxGiveSupply = maxGiveSupply;
+        maxSupply = maxsupply;
+        mintCost = mintcost;
+        maxMintPerUser = maxmintPerUser;
+        maxGiveSupply = maxgiveSupply;
         provenanceHash = provenancehash;
-        startingIndex = block.number % maxSupply;
+        startingIndex = (block.number + block.difficulty) % maxSupply;
     }
 
     modifier checkMintSupply(uint mintCount) {
         require(mintCount > 0, "Mint count must be greater than 0");   
-        require(_tokenIds.current() + mintCount <= _maxSupply, "Max number of nfts created");
+        require(_tokenIds.current() + mintCount <= maxSupply, "Max number of nfts created");
         _;
     }
 
@@ -64,8 +66,8 @@ contract ChesterNFT is ERC721Enumerable, Ownable {
         external payable checkMintSupply(mintCount)
     {  
         require(isLive, "Minting is not live");
-        require(msg.value >= _mintCost * mintCount, "Not enough eth sent to mint");
-        require(balanceOf(to) + mintCount <= _maxMintPerUser, "Max mints for account exceeded");
+        require(msg.value >= mintCost * mintCount, "Not enough eth sent to mint");
+        require(balanceOf(to) + mintCount <= maxMintPerUser, "Max mints for account exceeded");
 
         for(uint256 i = 0; i < mintCount; i++){
             _mint(to);
@@ -77,7 +79,7 @@ contract ChesterNFT is ERC721Enumerable, Ownable {
     function give(address to, uint256 mintCount)
         external onlyOwner checkMintSupply(mintCount) 
     {
-        require(_giveCount.current() + mintCount <= _maxGiveSupply, "Max give supply exceeded");
+        require(_giveCount.current() + mintCount <= maxGiveSupply, "Max give supply exceeded");
         for(uint256 i = 0; i < mintCount; i++){
             _mint(to);
             _giveCount.increment();
@@ -111,8 +113,8 @@ contract ChesterNFT is ERC721Enumerable, Ownable {
     {      
         uint256 currentId = _tokenIds.current() + startingIndex;
 
-        if(currentId >= _maxSupply){
-            currentId = currentId - _maxSupply;
+        if(currentId >= maxSupply){
+            currentId = currentId - maxSupply;
         }
 
         _safeMint(to, currentId);
