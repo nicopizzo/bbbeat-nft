@@ -70,9 +70,10 @@ contract("ChesterNFT", async accounts => {
     it("should approve user 6 to transfer", async () =>{
       var chester = await base.createContract();
       var user = accounts[6];
-      await chester.approve(user, 1, {from: accounts[5]});
+      var tokenid = await chester.tokenOfOwnerByIndex(accounts[5], 0);
+      await chester.approve(user, tokenid, {from: accounts[5]});
 
-      var approvedAccount = await chester.getApproved(1);
+      var approvedAccount = await chester.getApproved(tokenid);
       assert.equal(approvedAccount, user);
     });
 
@@ -96,7 +97,8 @@ contract("ChesterNFT", async accounts => {
     it("should transfer, user 6 approved", async () =>{
       var chester = await base.createContract();
       var user = accounts[6];
-      await chester.safeTransferFrom(accounts[5], user, 1, {from: user});
+      var tokenid = await chester.tokenOfOwnerByIndex(accounts[5], 0);
+      await chester.safeTransferFrom(accounts[5], user, tokenid, {from: user});
 
       var bal = await chester.balanceOf(user);
       assert.equal(bal, 1);

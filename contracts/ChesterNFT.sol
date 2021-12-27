@@ -29,23 +29,28 @@ contract ChesterNFT is ERC721Enumerable, Ownable {
     string private _baseTokenURI;
 
     // determine if public minting is live
-    bool public isLive;
+    bool public isLive = false;
 
     // hash to determine integrity of collection
     string public provenanceHash;
+
+    // index in which we are starting the distribution
+    uint256 public startingIndex;
 
     constructor(uint256 maxSupply, 
                 uint256 mintCost,
                 uint256 maxMintPerUser, 
                 uint256 maxGiveSupply,
-                string memory provenancehash) ERC721("ChesterNFT", "HAM") {
+                string memory provenancehash) ERC721("ChesterNFT", "HAM") 
+    {
+        require(maxSupply > maxGiveSupply, "Give supply exceeds total supply");
+
         _maxSupply = maxSupply;
         _mintCost = mintCost;
         _maxMintPerUser = maxMintPerUser;
-        require(maxSupply > maxGiveSupply, "Give supply exceeds total supply");
         _maxGiveSupply = maxGiveSupply;
         provenanceHash = provenancehash;
-        isLive = false;
+        startingIndex = block.number % maxSupply;
     }
 
     modifier checkMintSupply(uint mintCount) {
@@ -87,11 +92,11 @@ contract ChesterNFT is ERC721Enumerable, Ownable {
         payable(owner()).transfer(balance);
     }
 
-    // ability to toggle whether the minting process is live
-    function toggleLive()
+    // ability so that we will go live, can not stop going live after this is called
+    function goLive()
         external onlyOwner
     {
-        isLive = !isLive;
+        isLive = true;
     }
 
     // ability to set base uri. this should be done after minting is completed.
@@ -103,14 +108,15 @@ contract ChesterNFT is ERC721Enumerable, Ownable {
 
     function _mint(address to)
         internal
-        returns (uint256)
     {      
+        uint256 currentId = _tokenIds.current() + startingIndex;
+
+        if(currentId >= _maxSupply){
+            currentId = currentId - _maxSupply;
+        }
+
+        _safeMint(to, currentId);
         _tokenIds.increment();
-
-        uint256 newItemId = _tokenIds.current();
-        _safeMint(to, newItemId);
-
-        return newItemId;
     }
     
     function _baseURI() 

@@ -22,7 +22,7 @@ contract("ChesterNFT", async accounts => {
   it("should not toggle minting to live, not owner", async () => {
     var chester = await base.createContract();
     try{
-      await chester.toggleLive({from: accounts[1]});
+      await chester.goLive({from: accounts[1]});
       assert.fail("The transaction should have thrown an error.");
     }
     catch(err){
@@ -35,7 +35,7 @@ contract("ChesterNFT", async accounts => {
 
   it("should toggle minting to live", async () => {
     var chester = await base.createContract();
-    await chester.toggleLive();
+    await chester.goLive();
 
     var isLive = await chester.isLive();
     assert(isLive);
@@ -104,7 +104,7 @@ contract("ChesterNFT", async accounts => {
     var chester = await base.createContract();
     var result = await chester.tokenOfOwnerByIndex(accounts[1], 0);
 
-    assert.equal(result.words[0], 2);
+    assert.equal(result.words[0], 3);
   });
 
   it("should get token uri for id 2, not set", async () => {
