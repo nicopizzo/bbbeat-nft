@@ -31,17 +31,20 @@ contract ChesterNFT is ERC721Enumerable, Ownable {
     // determine if public minting is live
     bool public isLive;
 
+    // hash to determine integrity of collection
+    string public provenanceHash;
+
     constructor(uint256 maxSupply, 
                 uint256 mintCost,
                 uint256 maxMintPerUser, 
                 uint256 maxGiveSupply,
-                string memory baseUri) ERC721("ChesterNFT", "HAM") {
+                string memory provenancehash) ERC721("ChesterNFT", "HAM") {
         _maxSupply = maxSupply;
         _mintCost = mintCost;
         _maxMintPerUser = maxMintPerUser;
-        _baseTokenURI = baseUri;
         require(maxSupply > maxGiveSupply, "Give supply exceeds total supply");
         _maxGiveSupply = maxGiveSupply;
+        provenanceHash = provenancehash;
         isLive = false;
     }
 
@@ -84,10 +87,18 @@ contract ChesterNFT is ERC721Enumerable, Ownable {
         payable(owner()).transfer(balance);
     }
 
+    // ability to toggle whether the minting process is live
     function toggleLive()
         external onlyOwner
     {
         isLive = !isLive;
+    }
+
+    // ability to set base uri. this should be done after minting is completed.
+    function setBaseUri(string memory uri)
+        external onlyOwner
+    {
+        _baseTokenURI = uri;
     }
 
     function _mint(address to)

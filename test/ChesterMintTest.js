@@ -107,11 +107,31 @@ contract("ChesterNFT", async accounts => {
     assert.equal(result.words[0], 2);
   });
 
-  it("should get token uri for id 2", async () => {
+  it("should get token uri for id 2, not set", async () => {
     var chester = await base.createContract();
     var result = await chester.tokenURI(2);
 
-    assert.equal(result, "https://gateway.pinata.cloud/ipfs/QmZ2a29sVd7pNz9QGtb76aR99UKBzqcyoXnETDfDXBDXyv/2");
+    assert.equal(result, "");
+  });
+
+  it("should not be able to set token uri, not owner", async () => {
+    var chester = await base.createContract();
+    try
+    {
+      await chester.setBaseUri('https://testing/', {from: accounts[1]});
+      assert.fail("The transaction should have thrown an error.");
+    }
+    catch(err){
+      assert.include(err.message, "revert", "The error message should contain 'revert'");
+    }
+  });
+
+  it("should set token uri", async () => {
+    var chester = await base.createContract();
+    await chester.setBaseUri('https://testing/');
+    var result = await chester.tokenURI(2);
+
+    assert.equal(result, "https://testing/2");
   });
 
   // withdraw tests
