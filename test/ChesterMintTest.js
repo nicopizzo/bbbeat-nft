@@ -41,6 +41,19 @@ contract("ChesterNFT", async accounts => {
     assert(isLive);
   });
 
+  it("should not private minting, public minting is already live", async () => {
+    var chester = await base.createContract();
+    try{
+      await chester.privateSaleMint(accounts[1], 1, {value: mintCost, from: accounts[1]});
+      assert.fail("The transaction should have thrown an error.");
+    }
+    catch(err){
+      assert.include(err.message, "revert", "The error message should contain 'revert'");
+    }
+
+    var count = await chester.privateMintCount();
+    assert.equal(count, 0);
+  });
 
   it("should mint 1 from contract owner to contract owner", async () => {
     var chester = await base.createContract();

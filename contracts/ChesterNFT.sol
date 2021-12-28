@@ -161,7 +161,7 @@ contract ChesterNFT is ERC721Enumerable, Ownable {
     function withdraw() 
         external onlyOwner 
     {
-        uint balance = address(this).balance;
+        uint256 balance = address(this).balance;
         payable(owner()).transfer(balance);
     }
 
