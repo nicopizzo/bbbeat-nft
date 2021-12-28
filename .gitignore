@@ -3,4 +3,4 @@
 **/build
 **/.vscode
 **/bin
-truffle-config.js
+.wallet_secret.json

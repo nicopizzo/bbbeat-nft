@@ -1,0 +1,23 @@
+{
+    "name": "Day 1 Chester",
+    "image": "https://gateway.pinata.cloud/ipfs/QmQk1jyFvNg1WrK1FC3tGjtwsCiTeMCwqvWu64icvyuVzk/day_1.jpg",
+    "description": "This is the chester's first day",
+    "attributes": [
+        {
+            "trait_type": "skin",
+            "value": "clear"
+        },
+        {
+            "trait_type": "age",
+            "value": "young"
+        },
+        {
+            "trait_type": "position",
+            "value": "sitting"
+        },
+        {
+            "trait_type": "time_of_day",
+            "value": "morning"
+        }
+    ]
+}

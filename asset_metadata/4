@@ -1,0 +1,23 @@
+{
+    "name": "Captain Chester",
+    "image": "https://gateway.pinata.cloud/ipfs/QmQk1jyFvNg1WrK1FC3tGjtwsCiTeMCwqvWu64icvyuVzk/captain_ham.jpg",
+    "description": "This is the chester driving his boat",
+    "attributes": [
+        {
+            "trait_type": "skin",
+            "value": "clear"
+        },
+        {
+            "trait_type": "age",
+            "value": "young"
+        },
+        {
+            "trait_type": "position",
+            "value": "standing"
+        },
+        {
+            "trait_type": "time_of_day",
+            "value": "afternoon"
+        }
+    ]
+}
