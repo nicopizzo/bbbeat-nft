@@ -7,6 +7,7 @@ var testParams = {
   maxGiveSupply: 3,
   privateMintCost: "50000000000000000",
   privateMintPerUser: 2,
+  preMintUri: "https://premint/",
   provHash: "2E99758548972A8E8822AD47FA1017FF72F06F3FF6A016851F45C398732BC50C"
 };
 
@@ -17,6 +18,8 @@ var ropstenParams = {
   maxGiveSupply: 1,
   privateMintCost: "5000000000000000",
   privateMintPerUser: 1,
+  // TODO setup premint
+  preMintUri: "https://premint/",
   // TODO, calculate prov for chester collection
   provHash: "2E99758548972A8E8822AD47FA1017FF72F06F3FF6A016851F45C398732BC50C"
 };
@@ -30,6 +33,7 @@ module.exports = function(deployer) {
     testParams.maxGiveSupply, 
     testParams.privateMintCost, 
     testParams.privateMintPerUser, 
+    testParams.preMintUri,
     testParams.provHash);
 
   // for ropsten
@@ -40,5 +44,6 @@ module.exports = function(deployer) {
   //   ropstenParams.maxGiveSupply, 
   //   ropstenParams.privateMintCost, 
   //   ropstenParams.privateMintPerUser, 
+  //   ropstenParams.preMintUri,
   //   ropstenParams.provHash);
 };

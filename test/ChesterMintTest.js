@@ -124,12 +124,12 @@ contract("ChesterNFT", async accounts => {
     assert.equal(result.words[0], tokenId);
   });
 
-  it("should get token uri for id 2, not set", async () => {
+  it("should get pre-minted token uri for id, not set", async () => {
     var chester = await base.createContract();
     var firstMinted = await chester.tokenOfOwnerByIndex(accounts[0], 0);
     var result = await chester.tokenURI(firstMinted);
 
-    assert.equal(result, "");
+    assert.equal(result, "https://premint/" + firstMinted);
   });
 
   it("should not be able to set token uri, not owner", async () => {

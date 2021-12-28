@@ -50,6 +50,9 @@ contract ChesterNFT is ERC721Enumerable, Ownable {
     // max number of nfts a user can mint in private sale
     uint256 public maxPrivateSaleMintPerUser;
 
+    // uri used for minting prior to completion
+    string public preMintMetadataUri;
+
     // used to track the amount of nfts minted by address in public sale
     mapping(address => Counters.Counter) private _mintCount;
 
@@ -70,6 +73,7 @@ contract ChesterNFT is ERC721Enumerable, Ownable {
                 uint256 maxgiveSupply,
                 uint256 privatesalecost,
                 uint256 maxprivatesalemintPerUser,
+                string memory premintmetadatauri,
                 string memory provenancehash) ERC721("ChesterNFT", "HAM") 
     {
         require(maxsupply > maxgiveSupply, "Give supply exceeds total supply");
@@ -80,6 +84,7 @@ contract ChesterNFT is ERC721Enumerable, Ownable {
         maxGiveSupply = maxgiveSupply;
         privateSaleCost = privatesalecost;
         maxPrivateSaleMintPerUser = maxprivatesalemintPerUser;
+        preMintMetadataUri = premintmetadatauri;
         provenanceHash = provenancehash; 
         startingIndex = (block.number + block.difficulty) % maxSupply;
     }
@@ -211,6 +216,10 @@ contract ChesterNFT is ERC721Enumerable, Ownable {
         internal view override 
         returns (string memory)
     {
+        if(keccak256(abi.encodePacked(_baseTokenURI)) == keccak256(abi.encodePacked('')))
+        {
+            return preMintMetadataUri;
+        }
         return _baseTokenURI;
     }
 }
