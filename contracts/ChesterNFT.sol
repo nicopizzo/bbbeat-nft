@@ -41,9 +41,6 @@ contract ChesterNFT is ERC721Enumerable, Ownable {
     // index in which we are starting the distribution
     uint256 public startingIndex;
 
-    // whitelist for early minting
-    mapping(address => bool) public privateSaleWhiteList;
-
     // determine if private live
     bool public privateSaleLive = false;
 
@@ -54,10 +51,13 @@ contract ChesterNFT is ERC721Enumerable, Ownable {
     uint256 public maxPrivateSaleMintPerUser;
 
     // used to track the amount of nfts minted by address in public sale
-    mapping(address => Counters.Counter) _mintCount;
+    mapping(address => Counters.Counter) private _mintCount;
 
     // used to track the amount of nfts minted by address in private sale
-    mapping(address => Counters.Counter) _privateSaleCount;
+    mapping(address => Counters.Counter) private _privateSaleCount;
+
+    // whitelist for early minting
+    mapping(address => bool) private _privateSaleWhiteList;
 
     // base uri for hosting the images/ metadata
     // this will be set after minting is completed
@@ -110,7 +110,7 @@ contract ChesterNFT is ERC721Enumerable, Ownable {
     {
         require(privateSaleLive, "Private sale is not live");
         require(!isLive, "Public minting is already live");
-        require(privateSaleWhiteList[msg.sender], "Not on private sale whitelist");
+        require(getPrivateSaleWhitelist(to), "Not on private sale whitelist");
         require(msg.value >= privateSaleCost * mintCount, "Not enough eth sent to mint");
         require(_privateSaleCount[to].current() + mintCount <= maxPrivateSaleMintPerUser, "Max mints for account exceeded in private sale");
         
@@ -141,8 +141,8 @@ contract ChesterNFT is ERC721Enumerable, Ownable {
         for(uint256 i = 0; i < privateSaleAddresses.length; i++) {
             address addr = privateSaleAddresses[i];
             require(addr != address(0), "Zero address not allowed");
-            require(!privateSaleWhiteList[addr], "Address already added to private sale");
-            privateSaleWhiteList[addr] = true;
+            require(!getPrivateSaleWhitelist(addr), "Address already added to private sale");
+            _privateSaleWhiteList[addr] = true;
         }   
     }
 
@@ -153,7 +153,7 @@ contract ChesterNFT is ERC721Enumerable, Ownable {
         for(uint256 i = 0; i < privateSaleAddresses.length; i++) {
             address addr = privateSaleAddresses[i];
             require(addr != address(0), "Zero address not allowed");     
-            privateSaleWhiteList[addr] = false;
+            _privateSaleWhiteList[addr] = false;
         }
     }
 
@@ -184,6 +184,14 @@ contract ChesterNFT is ERC721Enumerable, Ownable {
         external onlyOwner
     {
         _baseTokenURI = uri;
+    }
+
+    // ability to check if a account was added to the private sale whitelist
+    function getPrivateSaleWhitelist(address addr)
+        public view
+        returns(bool)
+    {
+        return _privateSaleWhiteList[addr];
     }
 
     function _mint(address to)
