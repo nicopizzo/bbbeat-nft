@@ -113,7 +113,8 @@ contract("ChesterNFT", async accounts => {
 
   it("should get token uri for id 2, not set", async () => {
     var chester = await base.createContract();
-    var result = await chester.tokenURI(2);
+    var firstMinted = await chester.tokenOfOwnerByIndex(accounts[0], 0);
+    var result = await chester.tokenURI(firstMinted);
 
     assert.equal(result, "");
   });
@@ -132,10 +133,11 @@ contract("ChesterNFT", async accounts => {
 
   it("should set token uri", async () => {
     var chester = await base.createContract();
+    var firstMinted = await chester.tokenOfOwnerByIndex(accounts[0], 0);
     await chester.setBaseUri('https://testing/');
-    var result = await chester.tokenURI(2);
+    var result = await chester.tokenURI(firstMinted);
 
-    assert.equal(result, "https://testing/2");
+    assert.equal(result, "https://testing/" + firstMinted);
   });
 
   // withdraw tests

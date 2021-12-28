@@ -10,8 +10,15 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 
 contract ChesterNFT is ERC721Enumerable, Ownable {
     using Counters for Counters.Counter;
+
+    // tracker for token ids that are being distributed
     Counters.Counter private _tokenIds;
-    Counters.Counter private _giveCount;
+
+    // tracker for the amount of nfts that where given
+    Counters.Counter public giveMintCount;
+
+    // tracker for the amount of nfts that were minted during private sale
+    Counters.Counter public privateMintCount;
 
     // max number of nfts we are able to mint
     uint256 public maxSupply;
@@ -34,15 +41,35 @@ contract ChesterNFT is ERC721Enumerable, Ownable {
     // index in which we are starting the distribution
     uint256 public startingIndex;
 
+    // whitelist for early minting
+    mapping(address => bool) public privateSaleWhiteList;
+
+    // determine if private live
+    bool public privateSaleLive = false;
+
+    // cost to mint during private sale
+    uint256 public privateSaleCost;
+
+    // max number of nfts a user can mint in private sale
+    uint256 public maxPrivateSaleMintPerUser;
+
+    // used to track the amount of nfts minted by address in public sale
+    mapping(address => Counters.Counter) _mintCount;
+
+    // used to track the amount of nfts minted by address in private sale
+    mapping(address => Counters.Counter) _privateSaleCount;
+
     // base uri for hosting the images/ metadata
     // this will be set after minting is completed
     // provenance hash can be used to verify the integrity of the order and assets
-    string private _baseTokenURI;
+    string private _baseTokenURI;  
 
     constructor(uint256 maxsupply, 
                 uint256 mintcost,
                 uint256 maxmintPerUser, 
                 uint256 maxgiveSupply,
+                uint256 privatesalecost,
+                uint256 maxprivatesalemintPerUser,
                 string memory provenancehash) ERC721("ChesterNFT", "HAM") 
     {
         require(maxsupply > maxgiveSupply, "Give supply exceeds total supply");
@@ -51,7 +78,9 @@ contract ChesterNFT is ERC721Enumerable, Ownable {
         mintCost = mintcost;
         maxMintPerUser = maxmintPerUser;
         maxGiveSupply = maxgiveSupply;
-        provenanceHash = provenancehash;
+        privateSaleCost = privatesalecost;
+        maxPrivateSaleMintPerUser = maxprivatesalemintPerUser;
+        provenanceHash = provenancehash; 
         startingIndex = (block.number + block.difficulty) % maxSupply;
     }
 
@@ -61,16 +90,35 @@ contract ChesterNFT is ERC721Enumerable, Ownable {
         _;
     }
 
-    // external function to mint an nft with a given hash
+    // ability to mint a nft via public sale
     function mint(address to, uint256 mintCount)
         external payable checkMintSupply(mintCount)
     {  
         require(isLive, "Minting is not live");
         require(msg.value >= mintCost * mintCount, "Not enough eth sent to mint");
-        require(balanceOf(to) + mintCount <= maxMintPerUser, "Max mints for account exceeded");
+        require(_mintCount[to].current() + mintCount <= maxMintPerUser, "Max mints for account exceeded");
 
         for(uint256 i = 0; i < mintCount; i++){
             _mint(to);
+            _mintCount[to].increment();
+        }
+    }
+
+    // ability to mint a nft via the private sale
+    function privateSaleMint(address to, uint256 mintCount)
+        external payable checkMintSupply(mintCount)
+    {
+        require(privateSaleLive, "Private sale is not live");
+        require(!isLive, "Public minting is already live");
+        require(privateSaleWhiteList[msg.sender], "Not on private sale whitelist");
+        require(msg.value >= privateSaleCost * mintCount, "Not enough eth sent to mint");
+        require(_privateSaleCount[to].current() + mintCount <= maxPrivateSaleMintPerUser, "Max mints for account exceeded in private sale");
+        
+        for(uint256 i = 0; i < mintCount; i++)
+        {
+            _mint(to);
+            _privateSaleCount[to].increment();
+            privateMintCount.increment();
         }
     }
 
@@ -79,10 +127,33 @@ contract ChesterNFT is ERC721Enumerable, Ownable {
     function give(address to, uint256 mintCount)
         external onlyOwner checkMintSupply(mintCount) 
     {
-        require(_giveCount.current() + mintCount <= maxGiveSupply, "Max give supply exceeded");
+        require(giveMintCount.current() + mintCount <= maxGiveSupply, "Max give supply exceeded");
         for(uint256 i = 0; i < mintCount; i++){
             _mint(to);
-            _giveCount.increment();
+            giveMintCount.increment();
+        }
+    }
+
+    // allows owner to add addresses to the private sale whitelist
+    function addToPrivateSaleWhitelist(address[] calldata privateSaleAddresses) 
+        external onlyOwner 
+    {
+        for(uint256 i = 0; i < privateSaleAddresses.length; i++) {
+            address addr = privateSaleAddresses[i];
+            require(addr != address(0), "Zero address not allowed");
+            require(!privateSaleWhiteList[addr], "Address already added to private sale");
+            privateSaleWhiteList[addr] = true;
+        }   
+    }
+
+    // allows owner to remove addresses from the private sale whitelist
+    function removeFromPrivateSaleWhitelist(address[] calldata privateSaleAddresses) 
+        external onlyOwner 
+    {
+        for(uint256 i = 0; i < privateSaleAddresses.length; i++) {
+            address addr = privateSaleAddresses[i];
+            require(addr != address(0), "Zero address not allowed");     
+            privateSaleWhiteList[addr] = false;
         }
     }
 
@@ -99,6 +170,13 @@ contract ChesterNFT is ERC721Enumerable, Ownable {
         external onlyOwner
     {
         isLive = true;
+    }
+
+    // ability so that we will go live for the private sale, can not stop going live after this is called
+    function goPresaleLive()
+        external onlyOwner
+    {
+        privateSaleLive = true;
     }
 
     // ability to set base uri. this should be done after minting is completed.

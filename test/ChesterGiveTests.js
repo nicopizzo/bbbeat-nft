@@ -44,7 +44,7 @@ contract("ChesterNFT", async accounts => {
     it("should not deploy, give supply exceeds total supply", async () =>
     {
       try{
-        await base.ChesterNFT.new(5, "100000000000000000", 3, 6, "test", { gas: 4712388, gasPrice: 100000000000 });
+        await base.ChesterNFT.new(5, "100000000000000000", 3, 6, "50000000000000000", 1, "test", { gas: 4712388, gasPrice: 100000000000 });
         assert.fail("The transaction should have thrown an error.");
       }
       catch(err){
