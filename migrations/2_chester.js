@@ -24,24 +24,24 @@ var publicTestParams = {
 
 module.exports = function(deployer) {
   // for unit tests use parameters below
-  // deployer.deploy(ChesterNFT, 
-  //   testParams.maxTokens, 
-  //   testParams.mintCost, 
-  //   testParams.maxMintPerUser, 
-  //   testParams.maxGiveSupply, 
-  //   testParams.privateMintCost, 
-  //   testParams.privateMintPerUser, 
-  //   testParams.preMintUri,
-  //   testParams.provHash);
+  deployer.deploy(ChesterNFT, 
+    testParams.maxTokens, 
+    testParams.mintCost, 
+    testParams.maxMintPerUser, 
+    testParams.maxGiveSupply, 
+    testParams.privateMintCost, 
+    testParams.privateMintPerUser, 
+    testParams.preMintUri,
+    testParams.provHash);
 
   // for ropsten
-  deployer.deploy(ChesterNFT, 
-    publicTestParams.maxTokens, 
-    publicTestParams.mintCost, 
-    publicTestParams.maxMintPerUser, 
-    publicTestParams.maxGiveSupply, 
-    publicTestParams.privateMintCost, 
-    publicTestParams.privateMintPerUser, 
-    publicTestParams.preMintUri,
-    publicTestParams.provHash);
+  // deployer.deploy(ChesterNFT, 
+  //   publicTestParams.maxTokens, 
+  //   publicTestParams.mintCost, 
+  //   publicTestParams.maxMintPerUser, 
+  //   publicTestParams.maxGiveSupply, 
+  //   publicTestParams.privateMintCost, 
+  //   publicTestParams.privateMintPerUser, 
+  //   publicTestParams.preMintUri,
+  //   publicTestParams.provHash);
 };
