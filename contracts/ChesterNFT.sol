@@ -93,33 +93,33 @@ contract ChesterNFT is ERC721Enumerable, Ownable {
     }
 
     // ability to mint a nft via public sale
-    function mint(address to, uint256 mintCount)
+    function mint(uint256 mintCount)
         external payable checkMintSupply(mintCount)
     {  
         require(isLive, "Minting is not live");
         require(msg.value >= mintCost * mintCount, "Not enough eth sent to mint");
-        require(_mintCount[to].current() + mintCount <= maxMintPerUser, "Max mints for account exceeded");
+        require(_mintCount[msg.sender].current() + mintCount <= maxMintPerUser, "Max mints for account exceeded");
 
         for(uint256 i = 0; i < mintCount; i++){
-            _mint(to);
-            _mintCount[to].increment();
+            _mint(msg.sender);
+            _mintCount[msg.sender].increment();
         }
     }
 
     // ability to mint a nft via the private sale
-    function privateSaleMint(address to, uint256 mintCount)
+    function privateSaleMint(uint256 mintCount)
         external payable checkMintSupply(mintCount)
     {
         require(privateSaleLive, "Private sale is not live");
         require(!isLive, "Public minting is already live");
-        require(getPrivateSaleWhitelist(to), "Not on private sale whitelist");
+        require(getPrivateSaleWhitelist(msg.sender), "Not on private sale whitelist");
         require(msg.value >= privateSaleCost * mintCount, "Not enough eth sent to mint");
-        require(_privateSaleCount[to].current() + mintCount <= maxPrivateSaleMintPerUser, "Max mints for account exceeded in private sale");
+        require(_privateSaleCount[msg.sender].current() + mintCount <= maxPrivateSaleMintPerUser, "Max mints for account exceeded in private sale");
         
         for(uint256 i = 0; i < mintCount; i++)
         {
-            _mint(to);
-            _privateSaleCount[to].increment();
+            _mint(msg.sender);
+            _privateSaleCount[msg.sender].increment();
             privateMintCount.increment();
         }
     }

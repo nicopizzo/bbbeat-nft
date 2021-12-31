@@ -13,7 +13,7 @@ contract("ChesterNFT", async accounts => {
         maxSupply = await chester.maxSupply();
         
         await chester.goLive();
-        await chester.mint(user, 1, { value: mintCost });
+        await chester.mint(1, { value: mintCost });
         
         var tokenOwnedBy = await chester.ownerOf(startIndex);
         
@@ -24,7 +24,7 @@ contract("ChesterNFT", async accounts => {
         var chester = await base.createContract();
         var user = accounts[6];
 
-        await chester.mint(user, 3, { value: new BN(mintCost).mul(new BN(3)).toString() , from: user });
+        await chester.mint(3, { value: new BN(mintCost).mul(new BN(3)).toString() , from: user });
         
         var tokenOwnedBy = await chester.ownerOf(base.getNewIndex(startIndex, 1, maxSupply));
         assert.equal(tokenOwnedBy, user);
@@ -40,7 +40,7 @@ contract("ChesterNFT", async accounts => {
         var chester = await base.createContract();
         var user = accounts[7];
 
-        await chester.mint(user, 1, { value: mintCost , from: user });
+        await chester.mint(1, { value: mintCost , from: user });
         
         var tokenOwnedBy = await chester.ownerOf(base.getNewIndex(startIndex, 4, maxSupply));
         assert.equal(tokenOwnedBy, user);
