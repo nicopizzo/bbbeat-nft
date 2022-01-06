@@ -12,36 +12,36 @@ var testParams = {
 };
 
 var publicTestParams = {
-  maxTokens: 5,
+  maxTokens: 50,
   mintCost: "10000000000000000",
-  maxMintPerUser: 1,
-  maxGiveSupply: 4,
+  maxMintPerUser: 5,
+  maxGiveSupply: 10,
   privateMintCost: "5000000000000000",
-  privateMintPerUser: 1,
-  preMintUri: "https://gateway.pinata.cloud/ipfs/QmcfhnwDvQYxv5BSLCx7GGZqJxCT1rxiWmUCJJQK7LDDBd/",
-  provHash: "ce35cec7d507b6ac395ffbde47e8521384be4bbae368e2e1423ca44254c6cc59"
+  privateMintPerUser: 5,
+  preMintUri: "ipfs://QmT5WZpYe1wF6MmtdgzBqanngHxBEeZN1DQv5GmSiRCQvu/",
+  provHash: "4f25f4ce0e507037260d6b301f6b0a0f5d8ca9ce80a7ec2817198d982fcbc7b8"
 };
 
 module.exports = function(deployer) {
   // for unit tests use parameters below
-  deployer.deploy(ChesterNFT, 
-    testParams.maxTokens, 
-    testParams.mintCost, 
-    testParams.maxMintPerUser, 
-    testParams.maxGiveSupply, 
-    testParams.privateMintCost, 
-    testParams.privateMintPerUser, 
-    testParams.preMintUri,
-    testParams.provHash);
+  // deployer.deploy(ChesterNFT, 
+  //   testParams.maxTokens, 
+  //   testParams.mintCost, 
+  //   testParams.maxMintPerUser, 
+  //   testParams.maxGiveSupply, 
+  //   testParams.privateMintCost, 
+  //   testParams.privateMintPerUser, 
+  //   testParams.preMintUri,
+  //   testParams.provHash);
 
   // for ropsten
-  // deployer.deploy(ChesterNFT, 
-  //   publicTestParams.maxTokens, 
-  //   publicTestParams.mintCost, 
-  //   publicTestParams.maxMintPerUser, 
-  //   publicTestParams.maxGiveSupply, 
-  //   publicTestParams.privateMintCost, 
-  //   publicTestParams.privateMintPerUser, 
-  //   publicTestParams.preMintUri,
-  //   publicTestParams.provHash);
+  deployer.deploy(ChesterNFT, 
+    publicTestParams.maxTokens, 
+    publicTestParams.mintCost, 
+    publicTestParams.maxMintPerUser, 
+    publicTestParams.maxGiveSupply, 
+    publicTestParams.privateMintCost, 
+    publicTestParams.privateMintPerUser, 
+    publicTestParams.preMintUri,
+    publicTestParams.provHash);
 };

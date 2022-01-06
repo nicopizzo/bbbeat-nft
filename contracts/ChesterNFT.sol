@@ -71,7 +71,7 @@ contract ChesterNFT is ERC721Enumerable, Ownable {
                 uint256 privatesalecost,
                 uint256 maxprivatesalemintPerUser,
                 string memory premintmetadatauri,
-                string memory provenancehash) ERC721("ChesterNFT", "HAM") 
+                string memory provenancehash) ERC721("BBBeast", "BBB") 
     {
         require(maxsupply > maxgiveSupply, "Give supply exceeds total supply");
 
