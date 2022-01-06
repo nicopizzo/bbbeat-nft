@@ -12,5 +12,8 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "description": ""
+  "description": "",
+  "devDependencies": {
+    "truffle-plugin-verify": "^0.5.20"
+  }
 }

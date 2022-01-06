@@ -19,7 +19,8 @@
  */
 
 const HDWalletProvider = require('@truffle/hdwallet-provider');
-const { projectId, mnemonic } = require('./.wallet_secret.json')
+const { projectId, mnemonic } = require('./.wallet_secret.json');
+const { etherscan_key } = require('./.etherscan_secret.json');
 
 module.exports = {
   /**
@@ -98,7 +99,10 @@ module.exports = {
       // }
     }
   },
-
+  plugins: ['truffle-plugin-verify'],
+  api_keys: {
+    etherscan: etherscan_key
+  },
   // Truffle DB is currently disabled by default; to enable it, change enabled:
   // false to enabled: true. The default storage location can also be
   // overridden by specifying the adapter settings, as shown in the commented code below.

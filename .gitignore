@@ -4,3 +4,4 @@
 **/.vscode
 **/bin
 .wallet_secret.json
+.etherscan_secret.json
