@@ -1,11 +1,9 @@
-const ChesterNFT = artifacts.require("ChesterNFT");
-
-//var testContract = "0x00F77b302AF61eE999Bacb4dCFeAF54EdC678434";
+const BBBeastNFT = artifacts.require("BBBeastNFT");
 var testContract = "";
 
 async function createContract(){
-  if(testContract) return ChesterNFT.at(testContract);
-  return ChesterNFT.deployed();
+  if(testContract) return BBBeastNFT.at(testContract);
+  return BBBeastNFT.deployed();
 }
 
 function getNewIndex(startIndex, increment, maxSupply){
@@ -17,7 +15,7 @@ function getNewIndex(startIndex, increment, maxSupply){
 }
 
 module.exports = {
-    ChesterNFT: ChesterNFT,
+    BBBeastNFT: BBBeastNFT,
     createContract: createContract,
     getNewIndex: getNewIndex
 };
