@@ -50,6 +50,9 @@ contract BBBeastNFT is ERC721Enumerable, Ownable {
     // uri used for minting prior to completion
     string public preMintMetadataUri;
 
+    // used to determine if the base uri is permanently locked
+    bool public baseUriLocked = false;
+
     // used to track the amount of nfts minted by address in public sale
     mapping(address => Counters.Counter) private _mintCount;
 
@@ -181,10 +184,17 @@ contract BBBeastNFT is ERC721Enumerable, Ownable {
         privateSaleLive = true;
     }
 
+    function lockBaseUri()
+        external onlyOwner
+    {
+        baseUriLocked = true;
+    }
+
     // ability to set base uri. this should be done after minting is completed.
     function setBaseUri(string memory uri)
         external onlyOwner
     {
+        require(!baseUriLocked, "Uri is locked from being changed");
         _baseTokenURI = uri;
     }
 

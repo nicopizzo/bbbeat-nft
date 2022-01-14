@@ -21,4 +21,5 @@ Part 3 - During and Post Minting
 
 1) during minting, nfts can be created for the set price durring minting. Minting is done by calling the mint function
 2) update baseTokenUri to set the location of the assets. this is done by calling setBaseUri function
-3) can then withdraw contract funds by calling the withdraw function
+3) lock baseTokenUri by calling lockBaseUri function
+4) can then withdraw contract funds by calling the withdraw function
