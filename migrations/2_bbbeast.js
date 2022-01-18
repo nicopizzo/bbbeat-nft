@@ -12,8 +12,8 @@ var publicTestParams = {
   maxTokens: 50,
   maxMintPerUser: 5,
   maxGiveSupply: 10,
-  preMintUri: "ipfs://QmT5WZpYe1wF6MmtdgzBqanngHxBEeZN1DQv5GmSiRCQvu/",
-  provHash: "4f25f4ce0e507037260d6b301f6b0a0f5d8ca9ce80a7ec2817198d982fcbc7b8"
+  preMintUri: "ipfs://QmSUhLdcY6ZQvVaWwRX6esaScS5HkBiVeftHfRkkZnPJwy/",
+  provHash: "2a69ca99cdd3b85c8804a0cad8964670d1aa1fc9bc8b4dcdb295955fe285ff8a"
 };
 
 var deploy = function(d,p){

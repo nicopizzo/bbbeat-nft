@@ -19,7 +19,7 @@
  */
 
 const HDWalletProvider = require('@truffle/hdwallet-provider');
-const { projectId, mnemonic } = require('./.wallet_secret.json');
+const { projectId, mnemonic, privateKeys } = require('./.wallet_secret.json');
 const { etherscan_key } = require('./.etherscan_secret.json');
 
 module.exports = {
@@ -57,12 +57,12 @@ module.exports = {
     // Useful for deploying to a public network.
     // NB: It's important to wrap the provider as a function.
     rinkeby: {
-      provider: () => new HDWalletProvider(mnemonic, `https://rinkeby.infura.io/v3/${projectId}`),
+      provider: () => new HDWalletProvider(privateKeys, `https://rinkeby.infura.io/v3/${projectId}`, 0, 1),
       network_id: 4,       // rinkeby's id
       gas: 5000000,        // rinkeby has a lower block limit than mainnet
       confirmations: 2,    // # of confs to wait between deployments. (default: 0)
       timeoutBlocks: 200,  // # of blocks before a deployment times out  (minimum/default: 50)
-      skipDryRun: true     // Skip dry run before migrations? (default: false for public nets )
+      skipDryRun: false     // Skip dry run before migrations? (default: false for public nets )
     },
     // Useful for private networks
     // private: {
