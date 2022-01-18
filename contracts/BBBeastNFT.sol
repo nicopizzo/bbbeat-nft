@@ -8,161 +8,116 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 contract BBBeastNFT is ERC721Enumerable, Ownable {
     using Counters for Counters.Counter;
 
-    // tracker for token ids that are being distributed
+    uint256 public constant MINT_COST = 0.06 ether;   
+    uint256 public constant PRIVATE_MINT_COST = 0.04 ether;
+
+    uint256 public maxSupply;
+    uint256 public maxGiveSupply;
+    uint256 public maxMintPerAddress;
+    Counters.Counter public giveMintCount;
+    Counters.Counter public privateMintCount;
+    bool public isLive = false;
+    string public provenanceHash;
+    uint256 public startingIndex;
+    bool public privateSaleLive = false;
+    string public preMintMetadataUri;
+    mapping(address => bool) public privateSaleWhiteList;
+
+    string private _baseTokenURI;  
     Counters.Counter private _tokenIds;
 
-    // tracker for the amount of nfts that where given
-    Counters.Counter public giveMintCount;
-
-    // tracker for the amount of nfts that were minted during private sale
-    Counters.Counter public privateMintCount;
-
-    // max number of nfts we are able to mint
-    uint256 public maxSupply;
-
-    // max number of the supply availible to give
-    uint256 public maxGiveSupply;
-
-    // cost to mint a nft
-    uint256 public mintCost;
-
-    // max number of nfts a user can mint
-    uint256 public maxMintPerUser;
-
-    // determine if public minting is live
-    bool public isLive = false;
-
-    // hash to determine integrity of collection
-    string public provenanceHash;
-
-    // index in which we are starting the distribution
-    uint256 public startingIndex;
-
-    // determine if private live
-    bool public privateSaleLive = false;
-
-    // cost to mint during private sale
-    uint256 public privateSaleCost;
-
-    // max number of nfts a user can mint in private sale
-    uint256 public maxPrivateSaleMintPerUser;
-
-    // uri used for minting prior to completion
-    string public preMintMetadataUri;
-
-    // used to determine if the base uri is permanently locked
-    bool public baseUriLocked = false;
-
-    // used to track the amount of nfts minted by address in public sale
-    mapping(address => Counters.Counter) private _mintCount;
-
-    // used to track the amount of nfts minted by address in private sale
-    mapping(address => Counters.Counter) private _privateSaleCount;
-
-    // whitelist for early minting
-    mapping(address => bool) private _privateSaleWhiteList;
-
-    // base uri for hosting the images/ metadata
-    // this will be set after minting is completed
-    // provenance hash can be used to verify the integrity of the order and assets
-    string private _baseTokenURI;  
-
-    constructor(uint256 maxsupply, 
-                uint256 mintcost,
-                uint256 maxmintPerUser, 
-                uint256 maxgiveSupply,
-                uint256 privatesalecost,
-                uint256 maxprivatesalemintPerUser,
+    constructor(uint256 maxsupply,
+                uint256 maxgivesupply,
+                uint256 maxmintperaddress,
                 string memory premintmetadatauri,
                 string memory provenancehash) ERC721("BBBeast", "BBB") 
     {
-        require(maxsupply > maxgiveSupply, "Give supply exceeds total supply");
-
         maxSupply = maxsupply;
-        mintCost = mintcost;
-        maxMintPerUser = maxmintPerUser;
-        maxGiveSupply = maxgiveSupply;
-        privateSaleCost = privatesalecost;
-        maxPrivateSaleMintPerUser = maxprivatesalemintPerUser;
+        maxGiveSupply = maxgivesupply;
+        maxMintPerAddress = maxmintperaddress;
         preMintMetadataUri = premintmetadatauri;
         provenanceHash = provenancehash; 
         startingIndex = (block.number + block.difficulty) % maxSupply;
     }
 
+    /// @dev     Modifier to check global minting parameters
+    /// @param   mintCount The number of tokens to mint
     modifier checkMintSupply(uint mintCount) {
-        require(mintCount > 0, "Mint count must be greater than 0");   
-        require(_tokenIds.current() + mintCount <= maxSupply, "Max number of nfts created");
+        require(mintCount > 0, "INVALID_MINT_COUNT");   
+        require(_tokenIds.current() + mintCount <= maxSupply, "MAX_MINT_SUPPLY_REACHED");
+        require(ERC721.balanceOf(msg.sender) + mintCount <= maxMintPerAddress, "MAX_MINT_ADDRESS_REACHED");
         _;
     }
 
-    // ability to mint a nft via public sale
+    /// @dev     Mint action
+    /// @param   mintCount The number of tokens to mint
     function mint(uint256 mintCount)
         external payable checkMintSupply(mintCount)
     {  
-        require(isLive, "Minting is not live");
-        require(msg.value >= mintCost * mintCount, "Not enough eth sent to mint");
-        require(_mintCount[msg.sender].current() + mintCount <= maxMintPerUser, "Max mints for account exceeded");
+        require(isLive, "MINTING_NOT_LIVE");
+        require(msg.value >= MINT_COST * mintCount, "NOT_ENOUGH_ETH_SENT");
 
         for(uint256 i = 0; i < mintCount; i++){
             _mint(msg.sender);
-            _mintCount[msg.sender].increment();
         }
     }
 
-    // ability to mint a nft via the private sale
+    /// @dev     Private mint action
+    /// @param   mintCount The number of tokens to mint
     function privateSaleMint(uint256 mintCount)
         external payable checkMintSupply(mintCount)
     {
-        require(privateSaleLive, "Private sale is not live");
-        require(!isLive, "Public minting is already live");
-        require(getPrivateSaleWhitelist(msg.sender), "Not on private sale whitelist");
-        require(msg.value >= privateSaleCost * mintCount, "Not enough eth sent to mint");
-        require(_privateSaleCount[msg.sender].current() + mintCount <= maxPrivateSaleMintPerUser, "Max mints for account exceeded in private sale");
+        require(privateSaleLive, "PRIVATE_MINTING_NOT_LIVE");
+        require(!isLive, "PUBLIC_MINT_LIVE");
+        require(privateSaleWhiteList[msg.sender], "INVALID_ADDRESS");
+        require(msg.value >= PRIVATE_MINT_COST * mintCount, "NOT_ENOUGH_ETH_SENT");
         
         for(uint256 i = 0; i < mintCount; i++)
         {
             _mint(msg.sender);
-            _privateSaleCount[msg.sender].increment();
             privateMintCount.increment();
         }
     }
 
-    // ability to give token to an address for free
-    // has ability to give prior to go live
+    /// @dev     Give mint action. Allows owner to perform givaways
+    /// @param   to Address that will be given the tokens
+    /// @param   mintCount The number of tokens to mint
     function give(address to, uint256 mintCount)
         external onlyOwner checkMintSupply(mintCount) 
     {
-        require(giveMintCount.current() + mintCount <= maxGiveSupply, "Max give supply exceeded");
+        require(giveMintCount.current() + mintCount <= maxGiveSupply, "MAX_GIVE_SUPPLY_REACHED");
         for(uint256 i = 0; i < mintCount; i++){
             _mint(to);
             giveMintCount.increment();
         }
     }
 
-    // allows owner to add addresses to the private sale whitelist
+    /// @dev     Allows owner to add addresses to private mint whitelist
+    /// @param   privateSaleAddresses The addresses to add to the whitelist
     function addToPrivateSaleWhitelist(address[] calldata privateSaleAddresses) 
         external onlyOwner 
     {
         for(uint256 i = 0; i < privateSaleAddresses.length; i++) {
             address addr = privateSaleAddresses[i];
-            require(addr != address(0), "Zero address not allowed");
-            require(!getPrivateSaleWhitelist(addr), "Address already added to private sale");
-            _privateSaleWhiteList[addr] = true;
+            require(addr != address(0), "INVALID_ADDRESS");
+            require(!privateSaleWhiteList[addr], "DUPLICATE_ADDRESS");
+            privateSaleWhiteList[addr] = true;
         }   
     }
 
-    // allows owner to remove addresses from the private sale whitelist
+    /// @dev     Allows owner to remove addresses from private mint whitelist
+    /// @param   privateSaleAddresses The addresses to remove from the whitelist
     function removeFromPrivateSaleWhitelist(address[] calldata privateSaleAddresses) 
         external onlyOwner 
     {
         for(uint256 i = 0; i < privateSaleAddresses.length; i++) {
             address addr = privateSaleAddresses[i];
-            require(addr != address(0), "Zero address not allowed");     
-            _privateSaleWhiteList[addr] = false;
+            require(addr != address(0), "INVALID_ADDRESS");     
+            privateSaleWhiteList[addr] = false;
         }
     }
 
-    // ability to move contract funds to owner
+    /// @dev     Withdraws balance to owner's address
     function withdraw() 
         external onlyOwner 
     {
@@ -170,42 +125,31 @@ contract BBBeastNFT is ERC721Enumerable, Ownable {
         payable(owner()).transfer(balance);
     }
 
-    // ability so that we will go live, can not stop going live after this is called
+    /// @dev     Turns on public minting
     function goLive()
         external onlyOwner
     {
         isLive = true;
     }
 
-    // ability so that we will go live for the private sale, can not stop going live after this is called
+    /// @dev     Turns on private minting
     function goPresaleLive()
         external onlyOwner
     {
         privateSaleLive = true;
     }
 
-    function lockBaseUri()
-        external onlyOwner
-    {
-        baseUriLocked = true;
-    }
 
-    // ability to set base uri. this should be done after minting is completed.
+    /// @dev     Sets base uri used during reveal
+    /// @param  uri Base uri that will be used for get tokenuri
     function setBaseUri(string memory uri)
         external onlyOwner
     {
-        require(!baseUriLocked, "Uri is locked from being changed");
         _baseTokenURI = uri;
     }
 
-    // ability to check if a account was added to the private sale whitelist
-    function getPrivateSaleWhitelist(address addr)
-        public view
-        returns(bool)
-    {
-        return _privateSaleWhiteList[addr];
-    }
-
+    /// @dev    Core minting logic
+    /// @param  to Address that the token will be minted to.
     function _mint(address to)
         internal
     {      
@@ -219,6 +163,8 @@ contract BBBeastNFT is ERC721Enumerable, Ownable {
         _tokenIds.increment();
     }
     
+    /// @dev    Get base uri override to return the premint uri if not revealed
+    /// @return string Base uri of token
     function _baseURI() 
         internal view override 
         returns (string memory)

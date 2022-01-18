@@ -1,6 +1,6 @@
 var base = require("../modules/BBBeastBaseTests");
 
-var mintCost = "100000000000000000";
+var mintCost = "60000000000000000";
 var BN = web3.utils.BN;
 
 contract("BBBeastNFT", async accounts => {
@@ -150,40 +150,7 @@ contract("BBBeastNFT", async accounts => {
     var result = await bb.tokenURI(firstMinted);
 
     assert.equal(result, "https://testing/" + firstMinted);
-  });
-
-  it("should not lock token uri, not owner", async () =>{
-    var chester = await base.createContract();
-    try
-    {
-      await chester.lockBaseUri({from: accounts[1]});
-      assert.fail("The transaction should have thrown an error.");
-    }
-    catch(err){
-      assert.include(err.message, "revert", "The error message should contain 'revert'");
-    }
-  });
-
-  it("should lock token uri", async () =>{
-    var chester = await base.createContract();
-    await chester.lockBaseUri({from: accounts[0]});
-
-    var locked = await chester.baseUriLocked();
-
-    assert(locked);
-  });
-
-  it("should not be able to set token uri, locked", async () => {
-    var chester = await base.createContract();
-    try
-    {
-      await chester.setBaseUri('https://testing/', {from: accounts[0]});
-      assert.fail("The transaction should have thrown an error.");
-    }
-    catch(err){
-      assert.include(err.message, "revert", "The error message should contain 'revert'");
-    }
-  });  
+  }); 
 
   // withdraw tests
   it("should not be able to withdraw, not owner", async () => {
