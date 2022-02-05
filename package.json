@@ -14,6 +14,7 @@
   "license": "ISC",
   "description": "",
   "devDependencies": {
+    "erc721a": "^2.1.0",
     "truffle-plugin-verify": "^0.5.20"
   }
 }

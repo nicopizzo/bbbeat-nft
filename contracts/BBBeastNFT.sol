@@ -1,12 +1,10 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.11;
 
-import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
-import "@openzeppelin/contracts/utils/Counters.sol";
+import "erc721a/contracts/ERC721A.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
-contract BBBeastNFT is ERC721Enumerable, Ownable {
-    using Counters for Counters.Counter;
+contract BBBeastNFT is ERC721A , Ownable {
 
     uint256 public constant MINT_COST = 0.06 ether;   
     uint256 public constant PRIVATE_MINT_COST = 0.04 ether;
@@ -14,38 +12,35 @@ contract BBBeastNFT is ERC721Enumerable, Ownable {
     uint256 public maxSupply;
     uint256 public maxGiveSupply;
     uint256 public maxMintPerAddress;
-    Counters.Counter public giveMintCount;
-    Counters.Counter public privateMintCount;
+    uint256 public giveMintCount;
+    uint256 public privateMintCount;
     bool public isLive = false;
     string public provenanceHash;
-    uint256 public startingIndex;
     bool public privateSaleLive = false;
     string public preMintMetadataUri;
     mapping(address => bool) public privateSaleWhiteList;
 
     string private _baseTokenURI;  
-    Counters.Counter private _tokenIds;
 
     constructor(uint256 maxsupply,
                 uint256 maxgivesupply,
                 uint256 maxmintperaddress,
                 string memory premintmetadatauri,
-                string memory provenancehash) ERC721("BBBeast", "BBB") 
+                string memory provenancehash) ERC721A("BBBeast", "BBB") 
     {
         maxSupply = maxsupply;
         maxGiveSupply = maxgivesupply;
         maxMintPerAddress = maxmintperaddress;
         preMintMetadataUri = premintmetadatauri;
-        provenanceHash = provenancehash; 
-        startingIndex = (block.number + block.difficulty) % maxSupply;
+        provenanceHash = provenancehash;
     }
 
     /// @dev     Modifier to check global minting parameters
     /// @param   mintCount The number of tokens to mint
     modifier checkMintSupply(uint mintCount) {
         require(mintCount > 0, "INVALID_MINT_COUNT");   
-        require(_tokenIds.current() + mintCount <= maxSupply, "MAX_MINT_SUPPLY_REACHED");
-        require(ERC721.balanceOf(msg.sender) + mintCount <= maxMintPerAddress, "MAX_MINT_ADDRESS_REACHED");
+        require(ERC721A.totalSupply() + mintCount <= maxSupply, "MAX_MINT_SUPPLY_REACHED");
+        require(ERC721A.balanceOf(msg.sender) + mintCount <= maxMintPerAddress, "MAX_MINT_ADDRESS_REACHED");
         _;
     }
 
@@ -57,9 +52,7 @@ contract BBBeastNFT is ERC721Enumerable, Ownable {
         require(isLive, "MINTING_NOT_LIVE");
         require(msg.value >= MINT_COST * mintCount, "NOT_ENOUGH_ETH_SENT");
 
-        for(uint256 i = 0; i < mintCount; i++){
-            _mint(msg.sender);
-        }
+        _safeMint(msg.sender, mintCount);
     }
 
     /// @dev     Private mint action
@@ -72,11 +65,8 @@ contract BBBeastNFT is ERC721Enumerable, Ownable {
         require(privateSaleWhiteList[msg.sender], "INVALID_ADDRESS");
         require(msg.value >= PRIVATE_MINT_COST * mintCount, "NOT_ENOUGH_ETH_SENT");
         
-        for(uint256 i = 0; i < mintCount; i++)
-        {
-            _mint(msg.sender);
-            privateMintCount.increment();
-        }
+        _safeMint(msg.sender, mintCount);
+        privateMintCount += mintCount;
     }
 
     /// @dev     Give mint action. Allows owner to perform givaways
@@ -85,11 +75,9 @@ contract BBBeastNFT is ERC721Enumerable, Ownable {
     function give(address to, uint256 mintCount)
         external onlyOwner checkMintSupply(mintCount) 
     {
-        require(giveMintCount.current() + mintCount <= maxGiveSupply, "MAX_GIVE_SUPPLY_REACHED");
-        for(uint256 i = 0; i < mintCount; i++){
-            _mint(to);
-            giveMintCount.increment();
-        }
+        require(giveMintCount + mintCount <= maxGiveSupply, "MAX_GIVE_SUPPLY_REACHED");
+        _safeMint(to, mintCount);
+        giveMintCount += mintCount;
     }
 
     /// @dev     Allows owner to add addresses to private mint whitelist
@@ -146,21 +134,6 @@ contract BBBeastNFT is ERC721Enumerable, Ownable {
         external onlyOwner
     {
         _baseTokenURI = uri;
-    }
-
-    /// @dev    Core minting logic
-    /// @param  to Address that the token will be minted to.
-    function _mint(address to)
-        internal
-    {      
-        uint256 currentId = _tokenIds.current() + startingIndex;
-
-        if(currentId >= maxSupply){
-            currentId = currentId - maxSupply;
-        }
-
-        _safeMint(to, currentId);
-        _tokenIds.increment();
     }
     
     /// @dev    Get base uri override to return the premint uri if not revealed

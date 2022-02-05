@@ -114,13 +114,13 @@ contract("BBBeastNFT", async accounts => {
   // token id tests
   it("should get token id by owner", async () => {
     var bb = await base.createContract();
-    var startIndex = await bb.startingIndex();
-    var maxSupply = await bb.maxSupply();
+    //var startIndex = await bb.startingIndex();
+    //var maxSupply = await bb.maxSupply();
     var result = await bb.tokenOfOwnerByIndex(accounts[1], 0);
 
-    var tokenId = base.getNewIndex(startIndex, 1, maxSupply);
+    //var tokenId = base.getNewIndex(startIndex, 1, maxSupply);
 
-    assert.equal(result.words[0], tokenId);
+    assert.equal(result.words[0], 1);
   });
 
   it("should get pre-minted token uri for id, not set", async () => {
