@@ -16,6 +16,14 @@ var publicTestParams = {
   provHash: "2a69ca99cdd3b85c8804a0cad8964670d1aa1fc9bc8b4dcdb295955fe285ff8a"
 };
 
+var mainnetParams = {
+  maxTokens: 10000,
+  maxMintPerUser: 10,
+  maxGiveSupply: 200,
+  preMintUri: "ipfs://QmSUhLdcY6ZQvVaWwRX6esaScS5HkBiVeftHfRkkZnPJwy/",
+  provHash: "2a69ca99cdd3b85c8804a0cad8964670d1aa1fc9bc8b4dcdb295955fe285ff8a"
+};
+
 var deploy = function(d,p){
   d.deploy(BBBeastNFT,
     p.maxTokens,
@@ -28,4 +36,5 @@ var deploy = function(d,p){
 module.exports = function(deployer) {
   deploy(deployer, testParams);
   //deploy(deployer, publicTestParams);
+  //deploy(deployer, mainnetParams);
 };
